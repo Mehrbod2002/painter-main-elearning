@@ -65,7 +65,7 @@ impl Application {
                     WindowEvent::CloseRequested => state.window.set_visible(false),
                     _ => {
                         let window = &state.window;
-                        state.input(window.clone(), &event);
+                        state.input(window.clone(), event);
                     }
                 }
             }
@@ -79,18 +79,15 @@ impl Application {
 
                 state.window.request_redraw();
             }
-            Event::NewEvents(event) => match event {
-                StartCause::Init => {
-                    state
-                        .surface
-                        .configure(&state.device, &state.surface_config);
+            Event::NewEvents(event) => if event == &StartCause::Init {
+                state
+                    .surface
+                    .configure(&state.device, &state.surface_config);
 
-                    state.egui_renderer =
-                        Renderer::new(&state.device, state.surface_config.format, None, 1, true);
+                state.egui_renderer =
+                    Renderer::new(&state.device, state.surface_config.format, None, 1, true);
 
-                    state.window.request_redraw();
-                }
-                _ => (),
+                state.window.request_redraw();
             },
             Event::RedrawRequested(window_id) => {
                 if state.window.id() != *window_id {

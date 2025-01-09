@@ -246,7 +246,7 @@ impl WindowState {
                                         }
                                     }
                                 }
-                                if self.actions.len() > 0 {
+                                if !self.actions.is_empty() {
                                     self.actions = self.actions[..self.actions.len() - 1].to_vec();
                                 }
                             }
@@ -833,10 +833,10 @@ impl WindowState {
                                 text: text_entries.text.clone(),
                                 pending: text_entries.pending,
                                 bounds: Some(StreamRect {
-                                    x: text_entries.bounds.x.clone(),
-                                    y: text_entries.bounds.y.clone(),
-                                    width: text_entries.bounds.width.clone(),
-                                    height: text_entries.bounds.height.clone(),
+                                    x: text_entries.bounds.x,
+                                    y: text_entries.bounds.y,
+                                    width: text_entries.bounds.width,
+                                    height: text_entries.bounds.height,
                                 }),
                                 font_size: text_entries.font_size,
                             }),
@@ -876,7 +876,7 @@ impl WindowState {
             });
 
             for action in unsent_actions {
-                self.events_id.insert(action.id.clone());
+                self.events_id.insert(action.id);
             }
 
             self.actions_changed = false;

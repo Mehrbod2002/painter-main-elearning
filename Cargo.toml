@@ -12,7 +12,7 @@ stream = { git = "https://github_pat_11AMG7TGA0DfWMk8X44rzI_aw5rpZRHZzhWEz1E8Tf1
 bytemuck = "1.7.2"
 tokio = { version = "1.40.0", features = ["full"] }
 egui = "0.30.0"
-dioxus = { path = "/Users/mehrbod/projects/rusts/dioxus/packages/dioxus", features = ["desktop", "router", "hooks"] }
+dioxus = { git = "https://github.com/mehrbod2002/dioxus.git", branch = "custom_window", features = ["desktop", "router", "hooks"] }
 egui-wgpu = "0.30.0"
 egui_extras = { version = "0.30.0", features = ["all_loaders"] }
 image = { version = "0.25.5", features = ["png", "jpeg"] }
