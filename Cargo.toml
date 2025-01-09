@@ -8,17 +8,16 @@ name = "painter"
 path = "src/lib.rs"
 
 [dependencies]
-bytemuck = { workspace = true, features = ["derive"] }
-glyphon = { workspace = true }
-egui = { workspace = true}
-egui-wgpu = { workspace = true}
-dioxus = { workspace = true, features = ["desktop", "router", "hooks"] }
-egui_extras = { workspace = true, features = ["all_loaders"] }
-image = { workspace = true, features = ["png", "jpeg"] }
-tokio = { workspace = true }
-pollster = { workspace = true }
-wgpu = { workspace = true }
-stream = { workspace = true}
-tonic = { workspace = true, features = ["zstd"]}
-prost-types = { workspace = true }
-uuid = { workspace = true, features = ["v4"]}
+stream = { git = "https://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@github.com/Mehrbod2002/stream-elearning.git" }
+bytemuck = "1.7.2"
+tokio = { version = "1.40.0", features = ["full"] }
+egui = "0.30.0"
+dioxus = { path = "/Users/mehrbod/projects/rusts/dioxus/packages/dioxus", features = ["desktop", "router", "hooks"] }
+egui-wgpu = "0.30.0"
+egui_extras = { version = "0.30.0", features = ["all_loaders"] }
+image = { version = "0.25.5", features = ["png", "jpeg"] }
+pollster = "0.4"
+wgpu = "23.0.0"
+glyphon = "0.7.0"
+prost-types = "0.13.4"
+uuid = "1.11.0"
