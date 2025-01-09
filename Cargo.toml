@@ -20,4 +20,4 @@ pollster = "0.4"
 wgpu = "23.0.0"
 glyphon = "0.7.0"
 prost-types = "0.13.4"
-uuid = "1.11.0"
+uuid = { version = "1.11.0",  features = ["v4"]}
