@@ -1,0 +1,24 @@
+[package]
+name = "painter"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "painter"
+path = "src/lib.rs"
+
+[dependencies]
+bytemuck = { workspace = true, features = ["derive"] }
+glyphon = { workspace = true }
+egui = { workspace = true}
+egui-wgpu = { workspace = true}
+dioxus = { workspace = true, features = ["desktop", "router", "hooks"] }
+egui_extras = { workspace = true, features = ["all_loaders"] }
+image = { workspace = true, features = ["png", "jpeg"] }
+tokio = { workspace = true }
+pollster = { workspace = true }
+wgpu = { workspace = true }
+stream = { workspace = true}
+tonic = { workspace = true, features = ["zstd"]}
+prost-types = { workspace = true }
+uuid = { workspace = true, features = ["v4"]}
