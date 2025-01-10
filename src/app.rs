@@ -1,5 +1,6 @@
 use crate::WindowState;
 use dioxus::desktop::tao::{self, event::StartCause};
+use dioxus::desktop::UserWindowEvent;
 use egui_wgpu::Renderer;
 use glyphon::Resolution;
 use std::{
@@ -25,9 +26,9 @@ impl Application {
             Some(pollster::block_on(WindowState::new(window)).expect("unable to create window"));
     }
 
-    pub fn run_app<T: std::fmt::Debug>(
+    pub fn run_app(
         &mut self,
-        event: &Event<'_, T>,
+        event: &Event<'_, UserWindowEvent>,
         control_flow: &mut ControlFlow,
         _is_socket_event: bool,
         _socket_event: Option<()>,
@@ -79,16 +80,18 @@ impl Application {
 
                 state.window.request_redraw();
             }
-            Event::NewEvents(event) => if event == &StartCause::Init {
-                state
-                    .surface
-                    .configure(&state.device, &state.surface_config);
+            Event::NewEvents(event) => {
+                if event == &StartCause::Init {
+                    state
+                        .surface
+                        .configure(&state.device, &state.surface_config);
 
-                state.egui_renderer =
-                    Renderer::new(&state.device, state.surface_config.format, None, 1, true);
+                    state.egui_renderer =
+                        Renderer::new(&state.device, state.surface_config.format, None, 1, true);
 
-                state.window.request_redraw();
-            },
+                    state.window.request_redraw();
+                }
+            }
             Event::RedrawRequested(window_id) => {
                 if state.window.id() != *window_id {
                     return;
