@@ -7,7 +7,7 @@ use dioxus::desktop::{
 use egui::{Context, ImageSource, RawInput};
 use egui_wgpu::Renderer;
 use glyphon::{FontSystem, SwashCache};
-use stream::manager::GrpcConnectionManager;
+use stream::desktop::manager::GrpcConnectionManager;
 use wgpu::SurfaceConfiguration;
 
 #[repr(C)]

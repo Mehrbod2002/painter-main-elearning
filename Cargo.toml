@@ -8,7 +8,7 @@ name = "painter"
 path = "src/lib.rs"
 
 [dependencies]
-stream = { git = "https://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@github.com/Mehrbod2002/stream-elearning.git" }
+stream = { git = "https://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@github.com/Mehrbod2002/stream-elearning.git", features = ["desktop"] }
 bytemuck = "1.7.2"
 tokio = { version = "1.40.0", features = ["full"] }
 egui = "0.30.0"

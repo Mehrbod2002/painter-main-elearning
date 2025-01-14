@@ -19,7 +19,7 @@ use std::{
     sync::Arc,
     time::{Instant, SystemTime},
 };
-use stream::{
+use stream::desktop::{
     manager::GrpcConnectionManager,
     stream::{
         PaintEvent, StreamAction, StreamActions, StreamRect, StreamRectangle, StreamTextEntries,
