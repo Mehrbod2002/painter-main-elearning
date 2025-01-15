@@ -22,8 +22,8 @@ use std::{
 use stream::desktop::{
     manager::GrpcConnectionManager,
     stream::{
-        PaintEvent, StreamAction, StreamActions, StreamRect, StreamRectangle, StreamTextEntries,
-        StreamVertex,
+        paint_event::ActionType as StreamActionType, PaintEvent, StreamAction, StreamActions,
+        StreamRect, StreamRectangle, StreamTextEntries, StreamVertex,
     },
 };
 use tao::{
@@ -215,43 +215,115 @@ impl WindowState {
                         if self.pressed_keys.contains(&Key::Character("s")) {
                             self.create_rect = true;
                         }
-                        if self.undo_button {
-                            self.undo_button = false;
-                            if !self.actions.is_empty() {
-                                if self.actions.len() == 1 {
-                                    self.actions.clear();
-                                    self.texts.clear();
-                                    self.shapes.clear();
-                                    return true;
-                                }
-                                if let Some(action) = self.actions.pop() {
-                                    match action {
-                                        Action {
-                                            action_type: ActionType::Stroke(_),
-                                            ..
-                                        } => {
-                                            self.strokes.pop();
-                                        }
-                                        Action {
-                                            action_type: ActionType::Text(_),
-                                            ..
-                                        } => {
-                                            self.texts.pop();
-                                        }
-                                        Action {
-                                            action_type: ActionType::Shapes(_),
-                                            ..
-                                        } => {
-                                            self.shapes.pop();
-                                        }
-                                    }
-                                }
-                                if !self.actions.is_empty() {
-                                    self.actions = self.actions[..self.actions.len() - 1].to_vec();
-                                }
-                            }
-                            self.window.request_redraw();
-                        }
+
+                        // if self.undo_button {
+                        //     self.actions_changed = false;
+                        //     if self.actions.len() == 1 {
+                        //         self.actions.clear();
+                        //         self.texts.clear();
+                        //         self.shapes.clear();
+                        //         return true;
+                        //     }
+                        //     if let Some(ref action) = self.actions.pop() {
+                        //         let request = PaintEvent {
+                        //             chat_room: "general".to_owned(),
+                        //             actions: {
+                        //                 let stream_action = match action {
+                        //                     Action {
+                        //                         action_type: ActionType::Stroke(vertices),
+                        //                         id,
+                        //                     } => StreamAction {
+                        //                         vertices: vertices
+                        //                             .iter()
+                        //                             .map(|vertex| StreamVertex {
+                        //                                 position: vertex.position.to_vec(),
+                        //                                 color: vertex.color.to_vec(),
+                        //                             })
+                        //                             .collect(),
+                        //                         text: None,
+                        //                         rectangle: None,
+                        //                         id: id.to_string(),
+                        //                     },
+                        //                     Action {
+                        //                         action_type: ActionType::Text(text_entries),
+                        //                         id,
+                        //                     } => StreamAction {
+                        //                         vertices: vec![],
+                        //                         text: Some(StreamTextEntries {
+                        //                             position: text_entries.position.to_vec(),
+                        //                             color: text_entries
+                        //                                 .color
+                        //                                 .iter()
+                        //                                 .map(|color| *color as f32)
+                        //                                 .collect(),
+                        //                             text: text_entries.text.clone(),
+                        //                             pending: text_entries.pending,
+                        //                             bounds: Some(StreamRect {
+                        //                                 x: text_entries.bounds.x,
+                        //                                 y: text_entries.bounds.y,
+                        //                                 width: text_entries.bounds.width,
+                        //                                 height: text_entries.bounds.height,
+                        //                             }),
+                        //                             font_size: text_entries.font_size,
+                        //                         }),
+                        //                         rectangle: None,
+                        //                         id: id.to_string(),
+                        //                     },
+                        //                     Action {
+                        //                         action_type: ActionType::Shapes(rectangle),
+                        //                         id,
+                        //                     } => StreamAction {
+                        //                         vertices: vec![],
+                        //                         text: None,
+                        //                         rectangle: Some(StreamRectangle {
+                        //                             first: rectangle.first.to_vec(),
+                        //                             last: rectangle.last.to_vec(),
+                        //                             color: rectangle.color.to_vec(),
+                        //                         }),
+                        //                         id: id.to_string(),
+                        //                     },
+                        //                 };s
+                        //                 vec![StreamActions {
+                        //                     actions: vec![stream_action],
+                        //                 }]
+                        //             },
+                        //             timestamp: Some(Timestamp::from(SystemTime::now())),
+                        //             action_type: Some(StreamActionType::IsDeleted(true)),
+                        //         };
+                        //         let stream_service = self.stream_client.clone();
+                        //         tokio::spawn({
+                        //             async move {
+                        //                 let client = stream_service.get_client().await;
+                        //                 if let Ok(mut client) = client {
+                        //                     let _ = client.window_paint(request).await;
+                        //                 }
+                        //             }
+                        //         });
+                        //         match action {
+                        //             Action {
+                        //                 action_type: ActionType::Stroke(_),
+                        //                 ..
+                        //             } => {
+                        //                 self.strokes.pop();
+                        //             }
+                        //             Action {
+                        //                 action_type: ActionType::Text(_),
+                        //                 ..
+                        //             } => {
+                        //                 self.texts.pop();
+                        //             }
+                        //             Action {
+                        //                 action_type: ActionType::Shapes(_),
+                        //                 ..
+                        //             } => {
+                        //                 self.shapes.pop();
+                        //             }
+                        //         }
+                        //     }
+                        //     window.request_redraw();
+                        //     return true;
+                        // }
+        
                     } else {
                         self.mouse_pressed = false;
                         if !self.current_stroke.is_empty() {
@@ -262,6 +334,9 @@ impl WindowState {
                             });
                             self.current_stroke.clear();
                         }
+                        // if self.undo_button {
+                        //     self.undo_button = false;
+                        // }
                         self.create_rect = false;
 
                         if let (Some(first), Some(last)) =
@@ -378,13 +453,83 @@ impl WindowState {
                         } else if self.pressed_keys.contains(&Key::Control)
                             && self.pressed_keys.contains(&Key::Character("z"))
                         {
-                            if self.actions.len() == 1 {
-                                self.actions.clear();
-                                self.texts.clear();
-                                self.shapes.clear();
-                                return true;
-                            }
-                            if let Some(action) = self.actions.pop() {
+                            self.actions_changed = false;
+                            if let Some(ref action) = self.actions.pop() {
+                                let request = PaintEvent {
+                                    chat_room: "general".to_owned(),
+                                    actions: {
+                                        let stream_action = match action {
+                                            Action {
+                                                action_type: ActionType::Stroke(vertices),
+                                                id,
+                                            } => StreamAction {
+                                                vertices: vertices
+                                                    .iter()
+                                                    .map(|vertex| StreamVertex {
+                                                        position: vertex.position.to_vec(),
+                                                        color: vertex.color.to_vec(),
+                                                    })
+                                                    .collect(),
+                                                text: None,
+                                                rectangle: None,
+                                                id: id.to_string(),
+                                            },
+                                            Action {
+                                                action_type: ActionType::Text(text_entries),
+                                                id,
+                                            } => StreamAction {
+                                                vertices: vec![],
+                                                text: Some(StreamTextEntries {
+                                                    position: text_entries.position.to_vec(),
+                                                    color: text_entries
+                                                        .color
+                                                        .iter()
+                                                        .map(|color| *color as f32)
+                                                        .collect(),
+                                                    text: text_entries.text.clone(),
+                                                    pending: text_entries.pending,
+                                                    bounds: Some(StreamRect {
+                                                        x: text_entries.bounds.x,
+                                                        y: text_entries.bounds.y,
+                                                        width: text_entries.bounds.width,
+                                                        height: text_entries.bounds.height,
+                                                    }),
+                                                    font_size: text_entries.font_size,
+                                                }),
+                                                rectangle: None,
+                                                id: id.to_string(),
+                                            },
+                                            Action {
+                                                action_type: ActionType::Shapes(rectangle),
+                                                id,
+                                            } => StreamAction {
+                                                vertices: vec![],
+                                                text: None,
+                                                rectangle: Some(StreamRectangle {
+                                                    first: rectangle.first.to_vec(),
+                                                    last: rectangle.last.to_vec(),
+                                                    color: rectangle.color.to_vec(),
+                                                }),
+                                                id: id.to_string(),
+                                            },
+                                        };
+
+                                        vec![StreamActions {
+                                            actions: vec![stream_action],
+                                        }]
+                                    },
+                                    timestamp: Some(Timestamp::from(SystemTime::now())),
+                                    action_type: Some(StreamActionType::IsDeleted(true)),
+                                };
+                                let stream_service = self.stream_client.clone();
+                                tokio::spawn({
+                                    async move {
+                                        let client = stream_service.get_client().await;
+                                        if let Ok(mut client) = client {
+                                            let _ = client.window_paint(request).await;
+                                        }
+                                    }
+                                });
                                 match action {
                                     Action {
                                         action_type: ActionType::Stroke(_),
@@ -620,7 +765,7 @@ impl WindowState {
             stream_client: Arc::new(client),
             device,
             events_id: HashSet::new(),
-            undo_button: false,
+            // undo_button: false,
             shapes: Vec::new(),
             last_cursor_position: PhysicalPosition::new(0.0, 0.0),
             queue,
@@ -661,7 +806,7 @@ impl WindowState {
             color: include_image!("assets/color.png"),
             font: include_image!("assets/font.png"),
             rect: include_image!("assets/rect.png"),
-            prev: include_image!("assets/prev.png"),
+            // prev: include_image!("assets/prev.png"),
             raw_input,
             egui_context: egui_ctx,
         };
@@ -791,80 +936,84 @@ impl WindowState {
             });
         }
 
-        let send_ids: HashSet<Uuid> = self.events_id.clone();
-        let unsent_actions: Vec<&Action> = self
-            .actions
-            .iter()
-            .filter(|action| !send_ids.contains(&action.id))
-            .collect();
-
-        let request = PaintEvent {
-            chat_room: "general".to_owned(),
-            actions: unsent_actions
-                .iter()
-                .map(|action| {
-                    let stream_action = match action {
-                        Action {
-                            action_type: ActionType::Stroke(vertices),
-                            ..
-                        } => StreamAction {
-                            vertices: vertices
-                                .iter()
-                                .map(|vertex| StreamVertex {
-                                    position: vertex.position.to_vec(),
-                                    color: vertex.color.to_vec(),
-                                })
-                                .collect(),
-                            text: None,
-                            rectangle: None,
-                        },
-                        Action {
-                            action_type: ActionType::Text(text_entries),
-                            ..
-                        } => StreamAction {
-                            vertices: vec![],
-                            text: Some(StreamTextEntries {
-                                position: text_entries.position.to_vec(),
-                                color: text_entries
-                                    .color
-                                    .iter()
-                                    .map(|color| *color as f32)
-                                    .collect(),
-                                text: text_entries.text.clone(),
-                                pending: text_entries.pending,
-                                bounds: Some(StreamRect {
-                                    x: text_entries.bounds.x,
-                                    y: text_entries.bounds.y,
-                                    width: text_entries.bounds.width,
-                                    height: text_entries.bounds.height,
-                                }),
-                                font_size: text_entries.font_size,
-                            }),
-                            rectangle: None,
-                        },
-                        Action {
-                            action_type: ActionType::Shapes(rectangle),
-                            ..
-                        } => StreamAction {
-                            vertices: vec![],
-                            text: None,
-                            rectangle: Some(StreamRectangle {
-                                first: rectangle.first.to_vec(),
-                                last: rectangle.last.to_vec(),
-                                color: rectangle.color.to_vec(),
-                            }),
-                        },
-                    };
-
-                    StreamActions {
-                        actions: vec![stream_action],
-                    }
-                })
-                .collect(),
-            timestamp: Some(Timestamp::from(SystemTime::now())),
-        };
-
         if self.actions_changed {
+            let send_ids: HashSet<Uuid> = self.events_id.clone();
+            let unsent_actions: Vec<&Action> = self
+                .actions
+                .iter()
+                .filter(|action| !send_ids.contains(&action.id))
+                .collect();
+
+            let request = PaintEvent {
+                chat_room: "general".to_owned(),
+                actions: unsent_actions
+                    .iter()
+                    .map(|action| {
+                        let stream_action = match action {
+                            Action {
+                                action_type: ActionType::Stroke(vertices),
+                                id,
+                            } => StreamAction {
+                                vertices: vertices
+                                    .iter()
+                                    .map(|vertex| StreamVertex {
+                                        position: vertex.position.to_vec(),
+                                        color: vertex.color.to_vec(),
+                                    })
+                                    .collect(),
+                                text: None,
+                                rectangle: None,
+                                id: id.to_string(),
+                            },
+                            Action {
+                                action_type: ActionType::Text(text_entries),
+                                id,
+                            } => StreamAction {
+                                vertices: vec![],
+                                text: Some(StreamTextEntries {
+                                    position: text_entries.position.to_vec(),
+                                    color: text_entries
+                                        .color
+                                        .iter()
+                                        .map(|color| *color as f32)
+                                        .collect(),
+                                    text: text_entries.text.clone(),
+                                    pending: text_entries.pending,
+                                    bounds: Some(StreamRect {
+                                        x: text_entries.bounds.x,
+                                        y: text_entries.bounds.y,
+                                        width: text_entries.bounds.width,
+                                        height: text_entries.bounds.height,
+                                    }),
+                                    font_size: text_entries.font_size,
+                                }),
+                                rectangle: None,
+                                id: id.to_string(),
+                            },
+                            Action {
+                                action_type: ActionType::Shapes(rectangle),
+                                id,
+                            } => StreamAction {
+                                vertices: vec![],
+                                text: None,
+                                rectangle: Some(StreamRectangle {
+                                    first: rectangle.first.to_vec(),
+                                    last: rectangle.last.to_vec(),
+                                    color: rectangle.color.to_vec(),
+                                }),
+                                id: id.to_string(),
+                            },
+                        };
+
+                        StreamActions {
+                            actions: vec![stream_action],
+                        }
+                    })
+                    .collect(),
+                timestamp: Some(Timestamp::from(SystemTime::now())),
+                action_type: Some(StreamActionType::ActionRequest(true)),
+            };
+
             let stream_service = self.stream_client.clone();
             tokio::spawn({
                 async move {
@@ -1059,17 +1208,16 @@ impl WindowState {
                         ui.horizontal(|ui| {
                             ui.set_width(header_width);
 
-                            ui.add_space(header_height / 2.0);
-                            let prev = ImageButton::new(
-                                Image::new(self.prev.clone())
-                                    .fit_to_exact_size(egui::vec2(80.0, 30.0)),
-                            )
-                            .frame(false);
-                            let prev_button: egui::Response = ui.add(prev);
-                            if prev_button.clicked() {
-                                self.undo_button = true;
-                            }
-                            ui.add_space(header_width * 0.032);
+                            ui.add_space(header_width * self.window.scale_factor() as f32 / 10.0);
+                            // let prev = ImageButton::new(
+                            //     Image::new(self.prev.clone())
+                            //         .fit_to_exact_size(egui::vec2(80.0, 30.0)),
+                            // )
+                            // .frame(false);
+                            // let prev_button: egui::Response = ui.add(prev);
+                            // if prev_button.clicked() {
+                            //     self.undo_button = true;
+                            // }
 
                             let sqaure = ImageButton::new(
                                 Image::new(self.rect.clone())

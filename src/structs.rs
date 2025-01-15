@@ -122,7 +122,6 @@ pub struct WindowState {
     pub queue: egui_wgpu::wgpu::Queue,
     pub show_modal_fonts: bool,
     pub font_size: i32,
-    pub undo_button: bool,
     pub events_id: HashSet<uuid::Uuid>,
     pub show_modal_colors: bool,
     pub surface: egui_wgpu::wgpu::Surface<'static>,
@@ -163,10 +162,11 @@ pub struct WindowState {
 
     pub color: ImageSource<'static>,
     pub rect: ImageSource<'static>,
-    pub prev: ImageSource<'static>,
+    // pub prev: ImageSource<'static>,
     pub font: ImageSource<'static>,
 
     pub stream_client: Arc<GrpcConnectionManager>,
 
     pub actions_changed: bool,
+    // pub undo_button: bool,
 }
