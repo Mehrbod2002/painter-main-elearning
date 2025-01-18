@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use crate::{
     app::{DOUBLE_CLICK_DISTANCE, DOUBLE_CLICK_THRESHOLD},
     structs::{Action, ActionType, Rectangle, Vertex},
@@ -122,7 +123,7 @@ impl WindowState {
                 device_id: _,
                 state,
                 button,
-                ..
+                modifiers,
             } => {
                 let pressed = *state == ElementState::Pressed;
 
@@ -143,7 +144,12 @@ impl WindowState {
                     modifiers: self.raw_input.modifiers,
                 });
 
-                if *button == MouseButton::Right && *state == ElementState::Pressed {
+                if (*button == MouseButton::Right && *state == ElementState::Pressed)
+                    || (cfg!(target_os = "macos")
+                        && *button == MouseButton::Left
+                        && modifiers.control_key()
+                        && *state == ElementState::Pressed)
+                {
                     let now = Instant::now();
                     let position = self.last_cursor_position;
 
@@ -323,7 +329,6 @@ impl WindowState {
                         //     window.request_redraw();
                         //     return true;
                         // }
-        
                     } else {
                         self.mouse_pressed = false;
                         if !self.current_stroke.is_empty() {
@@ -396,6 +401,7 @@ impl WindowState {
                                             action_type: ActionType::Text(text.clone()),
                                             id: Uuid::new_v4(),
                                         });
+                                        self.actions_changed = true;
                                     }
                                     window.request_redraw();
                                 }
@@ -936,7 +942,7 @@ impl WindowState {
             });
         }
 
-        if self.actions_changed {
+        if self.actions_changed && !self.start_typing {
             let send_ids: HashSet<Uuid> = self.events_id.clone();
             let unsent_actions: Vec<&Action> = self
                 .actions
@@ -1208,7 +1214,7 @@ impl WindowState {
                         ui.horizontal(|ui| {
                             ui.set_width(header_width);
 
-                            ui.add_space(header_width * self.window.scale_factor() as f32 / 10.0);
+                            ui.add_space(header_width * self.window.scale_factor() as f32 / 11.0);
                             // let prev = ImageButton::new(
                             //     Image::new(self.prev.clone())
                             //         .fit_to_exact_size(egui::vec2(80.0, 30.0)),
@@ -1237,6 +1243,9 @@ impl WindowState {
                             .frame(false);
                             let font_button = ui.add(font);
                             if font_button.clicked() {
+                                if self.show_modal_colors {
+                                    self.show_modal_colors = false;
+                                }
                                 self.show_modal_fonts = true;
                                 self.egui_context.request_repaint();
                                 self.window.request_redraw();
@@ -1251,6 +1260,9 @@ impl WindowState {
                             .frame(false);
                             let color_picker_button = ui.add(color_picker);
                             if color_picker_button.clicked() {
+                                if self.show_modal_fonts {
+                                    self.show_modal_fonts = false;
+                                }
                                 self.show_modal_colors = true;
                                 self.egui_context.request_repaint();
                                 self.window.request_redraw();
