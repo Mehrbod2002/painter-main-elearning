@@ -600,14 +600,11 @@ impl WindowState {
         }
     }
 
-    pub async fn new(window: Arc<Window>) -> Result<Self, ()> {
+    pub async fn new(window: Arc<Window>, url: String) -> Result<Self, ()> {
         let physical_size = window.inner_size();
         let scale_factor = window.scale_factor();
 
-        let client = GrpcConnectionManager::new("http://localhost:50051".to_owned());
-        if client.connect().await.is_err() {
-            client.reconnect_with_backoff().await;
-        }
+        let client = GrpcConnectionManager::new(url.to_owned());
 
         let instance = Instance::new(InstanceDescriptor::default());
         let surface = instance

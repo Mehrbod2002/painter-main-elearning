@@ -21,9 +21,9 @@ pub const DOUBLE_CLICK_THRESHOLD: Duration = Duration::from_millis(500);
 pub const DOUBLE_CLICK_DISTANCE: f64 = 5.0;
 
 impl Application {
-    pub fn set_window(&mut self, window: Arc<Window>) {
+    pub fn set_window(&mut self, window: Arc<Window>, uri: String) {
         self.window_state =
-            Some(pollster::block_on(WindowState::new(window)).expect("unable to create window"));
+            Some(pollster::block_on(WindowState::new(window, uri)).expect("unable to create window"));
     }
 
     pub fn run_app(
